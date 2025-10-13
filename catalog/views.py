@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.urls import reverse_lazy
+from .forms import ProductForm
 
 from .models import Product
 from django.views.generic import ListView, DetailView, TemplateView
@@ -16,7 +17,6 @@ class ProductListView(ListView):
 class ContactsTemplateView(TemplateView):
     template_name = 'contacts.html'
     fields = ('name', 'phone', 'message')
-
 
     def post(self, request, *args, **kwargs):
         if request.method == "POST":
@@ -36,6 +36,6 @@ class ProductDetailView(DetailView):
 
 class ProductCreateView(CreateView):
     model = Product
-    fields = ('product_name', 'price_product', 'product_category', 'product_picture', 'product_description')
+    form_class = ProductForm
     template_name = 'product_form.html'
     success_url = reverse_lazy('catalog:product_list')
