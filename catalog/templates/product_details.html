@@ -7,5 +7,8 @@
     <p class="lead">Описание: {{product.product_description}}</p>
     <p class="lead">Категория: {{product.product_category}}</p>
     <p class="lead">Цена: {{product.price_product}}</p>
+    <a href="{% url 'catalog:product_list' %}" class="btn btn-primary">Вернуться к продуктам</a>
+    <a href="{% url 'catalog:product_edit' product.pk %}" class="btn btn-primary">Редактировать</a>
+    <a href="{% url 'catalog:delete_product' product.pk %}" class="btn btn-primary">Удалить</a>
 </div>
 {% endblock %}
