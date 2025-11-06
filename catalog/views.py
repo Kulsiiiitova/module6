@@ -1,10 +1,12 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.urls import reverse_lazy
+from .forms import ProductForm
 
 from .models import Product
 from django.views.generic import ListView, DetailView, TemplateView
-from django.views.generic.edit import CreateView
+from django.views.generic.edit import CreateView, DeleteView, UpdateView
 
 
 class ProductListView(ListView):
@@ -16,7 +18,6 @@ class ProductListView(ListView):
 class ContactsTemplateView(TemplateView):
     template_name = 'contacts.html'
     fields = ('name', 'phone', 'message')
-
 
     def post(self, request, *args, **kwargs):
         if request.method == "POST":
@@ -34,8 +35,28 @@ class ProductDetailView(DetailView):
     context_object_name = 'product'
 
 
-class ProductCreateView(CreateView):
+class ProductCreateView(CreateView, LoginRequiredMixin):
     model = Product
-    fields = ('product_name', 'price_product', 'product_category', 'product_picture', 'product_description')
+    form_class = ProductForm
+    template_name = 'product_form.html'
+    success_url = reverse_lazy('catalog:product_list')
+    def form_valid(self, form):
+        product = form.save()
+        user = self.request.user
+        product.owner = user
+        product.save()
+        return super().form_valid(form)
+
+
+class ProductDeleteView(DeleteView):
+    model = Product
+    template_name = 'product_confirm_delete.html'
+    success_url = reverse_lazy('catalog:product_list')
+    context_object_name = 'product'
+
+
+class ProductUpdateView(UpdateView):
+    model = Product
+    form_class = ProductForm
     template_name = 'product_form.html'
     success_url = reverse_lazy('catalog:product_list')
