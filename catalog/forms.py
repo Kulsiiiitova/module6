@@ -38,12 +38,13 @@ class ProductForm(forms.ModelForm):
 
     def clean_product_picture(self):
         file = self.cleaned_data.get('product_picture')
-        valid_extensions = ['.jpeg', '.png', ]
-        ext = os.path.splitext(file.name)[1].lower()
-        if ext not in valid_extensions:
-            raise ValidationError('Поддерживаются только следующие форматы: JPEG, PNG')
-        if file.size > 5*1024*1024:
-            raise ValidationError('Размер файла не должен превышать 5 Мб')
+        if file:
+            valid_extensions = ['.jpeg', '.jpg', '.png']
+            ext = os.path.splitext(file.name)[1].lower()
+            if ext not in valid_extensions:
+                raise ValidationError('Поддерживаются только следующие форматы: JPEG, JPG, PNG')
+            if file.size > 5 * 1024 * 1024:
+                raise ValidationError('Размер файла не должен превышать 5 Мб')
         return file
 
     def clean_price_product(self):
