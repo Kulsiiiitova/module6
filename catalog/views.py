@@ -1,13 +1,16 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.cache import cache
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, HttpResponseForbidden
 from django.urls import reverse_lazy
 from django.views import View
 from django.contrib import messages
-
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
+from .services import ProductService
 from .forms import ProductForm
 
-from .models import Product
+from .models import Product, Category
 from django.views.generic import ListView, DetailView, TemplateView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 
@@ -18,7 +21,13 @@ class ProductListView(ListView):
     context_object_name = 'products'
 
     def get_queryset(self):
-        return Product.objects.filter(is_published=True)
+        cache_key = 'published_products'
+        queryset = cache.get('catalog_queryset')
+
+        if not queryset:
+            queryset = Product.objects.filter(is_published=True)
+            cache.set(cache_key, queryset, 60 * 15)  # Кешируем на 15 минут
+        return queryset
 
 
 class ContactsTemplateView(TemplateView):
@@ -35,6 +44,7 @@ class ContactsTemplateView(TemplateView):
         return render(request, 'contacts.html')
 
 
+@method_decorator(cache_page(60 * 15), name='dispatch')
 class ProductDetailView(DetailView):
     model = Product
     template_name = 'product_details.html'
@@ -93,4 +103,16 @@ class CanUnpublishProduct(LoginRequiredMixin, View):
             product.save()
 
         return redirect('catalog:product_list')
+
+
+def category_products(request, category_name):
+    products = ProductService.get_products(category_name)
+    category = get_object_or_404(Category, category_name=category_name)
+
+    context = {
+        'products': products,
+        'category': category,
+    }
+
+    return render(request, 'products_category.html', context)
 
