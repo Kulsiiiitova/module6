@@ -1,0 +1,13 @@
+{% extends 'blog/base.html' %}
+{% load my_tags %}
+{% block title %}Пост{% endblock %}
+{% block content %}
+<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <img src="{{ post.picture | media_filter }}" class="img-fluid" alt="...">
+    <p class="lead">{{post.name}}</p>
+    <p class="lead">{{post.content}}</p>
+    <a href="{% url 'blogapp:posts_list' %}" class="btn btn-primary">Вернуться на посты</a>
+    <a href="{% url 'blogapp:post_edit' post.pk %}" class="btn btn-primary">Редактировать</a>
+    <a href="{% url 'blogapp:posts_delete' post.pk %}" class="btn btn-primary">Удалить</a>
+</div>
+{% endblock %}
