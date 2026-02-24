@@ -8,7 +8,23 @@
     <p class="lead">Категория: {{product.product_category}}</p>
     <p class="lead">Цена: {{product.price_product}}</p>
     <a href="{% url 'catalog:product_list' %}" class="btn btn-primary">Вернуться к продуктам</a>
-    <a href="{% url 'catalog:product_edit' product.pk %}" class="btn btn-primary">Редактировать</a>
-    <a href="{% url 'catalog:delete_product' product.pk %}" class="btn btn-primary">Удалить</a>
+    <a href="{% url 'catalog:category_products' product.product_category.category_name %}" class="btn btn-primary">Посмотреть продукты категории</a>
+    {% if user.is_authenticated %}
+        {% if user == product.author %}
+            <a href="{% url 'catalog:product_edit' product.pk %}" class="btn btn-primary">Редактировать</a>
+        {% endif %}
+    {% endif %}
+    {% if user == product.author or perms.catalog.can_delete_product %}
+        <a href="{% url 'catalog:delete_product' product.pk %}" class="btn btn-primary">️ Удалить </a>
+    {% endif %}
+
+
+
+    {% if perms.catalog.can_unpublish_product and product.is_published %}
+        <form method="post" action="{% url 'catalog:unpublish_product' product.pk %}" >
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">Отменить публикацию</button>
+        </form>
+    {% endif %}
 </div>
 {% endblock %}
